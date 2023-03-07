@@ -11,7 +11,7 @@
           <div class="goods-price">{{ goods.price }}￥</div>
           <div class="goods-count">
             请选择购买数量：
-            <a-input-number id="inputNumber" v-model:value="goodsCount" :min="1" :max="10"/>
+            <a-input-number id="inputNumber" v-model:value="goodsCount" :min="1" :max="99"/>
           </div>
           <div class="actions-line">
             <a-button class="actions-btn" size="large" type="danger" @click="buyNow">立即购买</a-button>
@@ -28,6 +28,8 @@ import { useRoute } from 'vue-router'
 import Client from 'shopify-buy'
 import Goods from '@/model/goods'
 import { onMounted, ref } from 'vue'
+import CartItem from '@/model/cart-item'
+import { notification } from 'ant-design-vue'
 
 const $route = useRoute()
 const goods = ref(new Goods())
@@ -83,7 +85,32 @@ function buyNow () {
 }
 
 function addToCart () {
-
+  const cartItemListStr = localStorage.getItem('vrtalk-cart')
+  let cartItemList: CartItem[] = []
+  if (cartItemListStr && cartItemListStr !== '') {
+    cartItemList = JSON.parse(cartItemListStr)
+  }
+  const cartItem = new CartItem()
+  cartItem.name = goods.value.name
+  cartItem.price = goods.value.price
+  cartItem.imageUrl = goods.value.coverImage
+  cartItem.variantId = goods.value.variantId
+  cartItem.count = goodsCount.value
+  let isNew = true
+  for (let i = 0; i < cartItemList.length; i++) {
+    if (cartItemList[i].variantId === goods.value.variantId) {
+      cartItem.count += cartItemList[i].count
+      cartItemList[i] = cartItem
+      isNew = false
+    }
+  }
+  if (isNew) {
+    cartItemList.push(cartItem)
+  }
+  localStorage.setItem('vrtalk-cart', JSON.stringify(cartItemList))
+  notification.success({
+    message: '成功加入到购物车'
+  })
 }
 
 </script>
@@ -96,11 +123,14 @@ function addToCart () {
 
     .left-area {
       margin: 20px;
-      width: 40%;
+      min-width: 40vw;
+      height: 30vw;
       background-color: #f0f0f0;
 
       .cover-image {
         width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
     }
 
@@ -135,6 +165,7 @@ function addToCart () {
         display: flex;
         flex-direction: row;
         align-items: end;
+        margin-top: 40px;
 
         .actions-btn {
           margin-right: 20px;
