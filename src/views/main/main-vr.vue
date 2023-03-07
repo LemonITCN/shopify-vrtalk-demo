@@ -13,27 +13,31 @@
         title="我的购物车"
         placement="right">
       <template #extra>
-        <a-button type="primary" @click="submitOrder" :disabled="cartItemList.length === 0">立即下单</a-button>
+        <a-button type="primary" @click="submitOrder" :disabled="cartItemList.length === 0" :loading="submittingState">
+          立即下单
+        </a-button>
       </template>
-      <div class="no-cart-item-tip">购物车是空的哦！</div>
-      <div class="cart-item" v-for="(cartItem, cIndex) in cartItemList" :key="cIndex">
-        <img class="cart-img" :src="cartItem.imageUrl"/>
-        <div class="goods-right">
-          <div class="goods-name">{{ cartItem.name }}</div>
-          <a-input-number class="count-input" v-model:value="cartItem.count" :min="1" :max="99"/>
+      <div class="no-cart-item-tip" v-if="cartItemList.length === 0">购物车是空的哦！</div>
+      <a-spin :spinning="submittingState">
+        <div class="cart-item" v-for="(cartItem, cIndex) in cartItemList" :key="cIndex">
+          <img class="cart-img" :src="cartItem.imageUrl"/>
+          <div class="goods-right">
+            <div class="goods-name">{{ cartItem.name }}</div>
+            <a-input-number class="count-input" v-model:value="cartItem.count" :min="1" :max="99"/>
+          </div>
+          <a-popconfirm
+              title="您确认要从购物车中移除吗?"
+              ok-text="确认删除"
+              cancel-text="取消"
+              @confirm="removeCartItem(cIndex)">
+            <a-button type="primary" shape="circle" class="delete-btn" danger ghost>
+              <template #icon>
+                <delete-outlined/>
+              </template>
+            </a-button>
+          </a-popconfirm>
         </div>
-        <a-popconfirm
-            title="您确认要从购物车中移除吗?"
-            ok-text="确认删除"
-            cancel-text="取消"
-            @confirm="removeCartItem(cIndex)">
-          <a-button type="primary" shape="circle" class="delete-btn" danger ghost>
-            <template #icon>
-              <delete-outlined/>
-            </template>
-          </a-button>
-        </a-popconfirm>
-      </div>
+      </a-spin>
     </a-drawer>
   </div>
 </template>
@@ -47,6 +51,7 @@ import type CartItem from '@/model/cart-item'
 let client: Client | null = null
 const cartShowState = ref(false)
 const cartItemList: Ref<CartItem[]> = ref([])
+const submittingState = ref(false)
 
 watch(cartItemList, (value, oldValue) => {
   const cartStr = JSON.stringify(cartItemList.value)
@@ -77,6 +82,7 @@ function removeCartItem (cartItemIndex: number) {
 }
 
 function submitOrder () {
+  submittingState.value = true
   client = Client.buildClient({
     apiVersion: '2023-01',
     domain: 'shop.vrtalk.online',
@@ -92,6 +98,7 @@ function submitOrder () {
     })
     if (client != null) {
       client.checkout.addLineItems(newCheckout.id, lineItemsToAdd).then((checkout) => {
+        submittingState.value = false
         console.log('下单啦！', newCheckout)
         window.open(newCheckout.webUrl)
       })
