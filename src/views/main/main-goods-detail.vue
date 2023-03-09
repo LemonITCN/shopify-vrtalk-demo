@@ -10,12 +10,12 @@
           <div class="goods-description">{{ goods.description }}</div>
           <div class="goods-price">{{ goods.price }}￥</div>
           <div class="goods-count">
-            请选择购买数量：
+            購入数を選択 ：
             <a-input-number id="inputNumber" v-model:value="goodsCount" :min="1" :max="99"/>
           </div>
           <div class="actions-line">
-            <a-button class="actions-btn" size="large" type="danger" @click="buyNow">立即购买</a-button>
-            <a-button class="actions-btn" size="large" type="primary" @click="addToCart">加入购物车</a-button>
+            <a-button class="actions-btn" size="large" type="danger" @click="buyNow">今すぐ購入</a-button>
+            <a-button class="actions-btn" size="large" type="primary" @click="addToCart">カートに入れる</a-button>
           </div>
         </div>
       </div>
@@ -109,7 +109,7 @@ function addToCart () {
   }
   localStorage.setItem('vrtalk-cart', JSON.stringify(cartItemList))
   notification.success({
-    message: '成功加入到购物车'
+    message: 'カートに追加されました'
   })
 }
 

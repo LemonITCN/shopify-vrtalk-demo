@@ -10,14 +10,14 @@
     <a-drawer
         v-model:visible="cartShowState"
         class="custom-class"
-        title="我的购物车"
+        title="カート"
         placement="right">
       <template #extra>
         <a-button type="primary" @click="submitOrder" :disabled="cartItemList.length === 0" :loading="submittingState">
-          立即下单
+          レジに進む
         </a-button>
       </template>
-      <div class="no-cart-item-tip" v-if="cartItemList.length === 0">购物车是空的哦！</div>
+      <div class="no-cart-item-tip" v-if="cartItemList.length === 0">お客様のカートに商品はありません。</div>
       <a-spin :spinning="submittingState">
         <div class="cart-item" v-for="(cartItem, cIndex) in cartItemList" :key="cIndex">
           <img class="cart-img" :src="cartItem.imageUrl"/>
@@ -26,9 +26,9 @@
             <a-input-number class="count-input" v-model:value="cartItem.count" :min="1" :max="99"/>
           </div>
           <a-popconfirm
-              title="您确认要从购物车中移除吗?"
-              ok-text="确认删除"
-              cancel-text="取消"
+              title="カートからこちらの商品を削除しますか?"
+              ok-text="削除"
+              cancel-text="キャンセル"
               @confirm="removeCartItem(cIndex)">
             <a-button type="primary" shape="circle" class="delete-btn" danger ghost>
               <template #icon>
